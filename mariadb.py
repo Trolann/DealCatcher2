@@ -2,12 +2,6 @@ import mysql.connector
 import os
 
 class ProductDatabase:
-    HOST = "192.168.86.6"
-    PORT = 3306
-    USERNAME = "dc_test"
-    PASSWORD = "dc_test"
-    DB_NAME = "dc_test"
-
     def __init__(self):
         # load the environment variables from the db.env file
         with open('db.env') as f:
@@ -18,13 +12,9 @@ class ProductDatabase:
         # access the environment variables
         self.HOST = os.getenv("HOST")
         self.PORT = os.getenv("PORT")
-        print(self.PORT)
         self.USERNAME = os.getenv("USERNAME")
-        print(self.USERNAME)
         self.PASSWORD = os.getenv("PASSWORD")
-        print(self.PASSWORD)
         self.DB_NAME = os.getenv("DB_NAME")
-        print(self.DB_NAME)
 
         self.conn = mysql.connector.connect(
             host=self.HOST,
