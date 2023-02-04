@@ -1,4 +1,5 @@
 import mysql.connector
+import os
 
 class ProductDatabase:
     HOST = "192.168.86.6"
@@ -8,9 +9,26 @@ class ProductDatabase:
     DB_NAME = "dc_test"
 
     def __init__(self):
+        # load the environment variables from the db.env file
+        with open('db.env') as f:
+            for line in f:
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
+        # access the environment variables
+        self.HOST = os.getenv("HOST")
+        self.PORT = os.getenv("PORT")
+        print(self.PORT)
+        self.USERNAME = os.getenv("USERNAME")
+        print(self.USERNAME)
+        self.PASSWORD = os.getenv("PASSWORD")
+        print(self.PASSWORD)
+        self.DB_NAME = os.getenv("DB_NAME")
+        print(self.DB_NAME)
+
         self.conn = mysql.connector.connect(
             host=self.HOST,
-            port=self.PORT,
+            port=int(self.PORT),
             user=self.USERNAME,
             password=self.PASSWORD,
             database=self.DB_NAME
@@ -89,3 +107,5 @@ class ProductDatabase:
 
 if __name__ == "__main__":
     db = ProductDatabase()
+    while True:
+        continue
