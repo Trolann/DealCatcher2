@@ -1,4 +1,3 @@
-import re
 import requests
 from headers import get_headers
 

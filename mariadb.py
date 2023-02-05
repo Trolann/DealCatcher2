@@ -4,10 +4,10 @@ import os
 class ProductDatabase:
     def __init__(self):
         # load the environment variables from the db.env file
-        with open('db.env') as f:
-            for line in f:
-                key, value = line.strip().split('=', 1)
-                os.environ[key] = value
+        #with open('db.env') as f:
+        #    for line in f:
+        #        key, value = line.strip().split('=', 1)
+        #        os.environ[key] = value
 
         # access the environment variables
         self.HOST = os.getenv("HOST")
@@ -83,9 +83,48 @@ class ProductDatabase:
         return self.cursor.fetchall()
 
     def add_products(self, products):
-        for name, url, price in products:
-            self.insert_product(name, url, price)
+        for product in products:
+            name = product["product_name"]
+            url = product["product_url"]
+            price = product["product_price"]
+            try:
+                self.insert_product(name, url, price)
+            except mysql.connector.errors.DataError as e:
+                print(name, url, price)
+                print(e)
         self.conn.commit()
+
+    def sync_products(self, website_products):
+        # Get all products from the database
+        db_products = self.get_all_products()
+        db_product_names = [product[1] for product in db_products]
+
+        # Iterate through all products on the website
+        for website_product in website_products:
+            product_name = website_product["product_name"]
+            product_url = website_product["product_url"]
+            product_price = website_product["product_price"]
+
+            # Check if the product is in the database
+            if product_name in db_product_names:
+                # Get the product from the database
+                db_product = self.get_product(product_name)
+                # Compare the prices
+                if db_product[3] != product_price:
+                    # Update the price if there's a difference
+                    self.update_product(product_name, product_url, product_price)
+                # Remove the product name from the list of product names in the database
+                db_product_names.remove(product_name)
+            else:
+                # Insert the new product into the database
+                self.insert_product(product_name, product_url, product_price)
+
+        # Remove any products that are in the database but not on the website
+        for remaining_product_name in db_product_names:
+            self.remove_product(remaining_product_name)
+
+        self.conn.commit()
+
 
     def close(self):
         self.cursor.close()
